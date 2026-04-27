@@ -49,9 +49,6 @@ pub struct AppSettings {
 
     // 高级
     pub verbose: bool,
-
-    // 界面
-    pub language: String,
 }
 
 impl Default for AppSettings {
@@ -85,7 +82,6 @@ impl Default for AppSettings {
             rpc_device: "".to_string(),
             rpc_cache: false,
             verbose: false,
-            language: String::new(),
         }
     }
 }
@@ -165,17 +161,7 @@ impl SettingsManager {
         Ok(())
     }
 
-    /// 始终检测系统语言，不依赖缓存值
-    pub fn init_language(&self, settings: &mut AppSettings) {
-        let locale = sys_locale::get_locale().unwrap_or_default();
-        settings.language = if locale.starts_with("zh") {
-            "zh".to_string()
-        } else {
-            "en".to_string()
-        };
-    }
-
-    /// 在可执行文件所在目录查找指定名称的可执行文件
+  /// 在可执行文件所在目录查找指定名称的可执行文件
     pub fn locate_exe(&self, name: &str) -> Option<PathBuf> {
         let exe_dir = self.config_dir.parent()?;
         let filename = if cfg!(target_os = "windows") {
