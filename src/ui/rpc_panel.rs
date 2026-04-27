@@ -1,6 +1,6 @@
-use crate::config::settings::AppSettings;
+use crate::config::settings::{AppSettings, SettingsManager};
 
-pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings) {
+pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, settings_manager: &SettingsManager) {
     ui.heading("RPC 配置");
     ui.separator();
 
@@ -14,6 +14,13 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings) {
                 .pick_file()
             {
                 settings.rpc_server_path = path;
+            }
+        }
+        if ui.button("自动检测").clicked() {
+            if let Some(path) = settings_manager.auto_detect_rpc_path() {
+                settings.rpc_server_path = path;
+            } else {
+                settings.rpc_server_path = std::path::PathBuf::from("");
             }
         }
     });

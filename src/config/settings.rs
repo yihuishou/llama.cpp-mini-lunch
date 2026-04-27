@@ -16,6 +16,7 @@ pub struct AppSettings {
 
     // 模型
     pub model_path: PathBuf,
+    pub mmproj_path: PathBuf,
 
     // 推理参数
     pub n_ctx: usize,
@@ -58,6 +59,7 @@ impl Default for AppSettings {
             port: 8080,
             parallel_slots: 4,
             model_path: PathBuf::new(),
+    mmproj_path: PathBuf::new(),
             n_ctx: 4096,
             n_predict: 256,
             temperature: 0.8,
@@ -157,5 +159,31 @@ impl SettingsManager {
         let path = self.config_dir.join(PRESETS_DIR).join(format!("{}.json", name));
         fs::remove_file(&path).map_err(|e| format!("删除预设失败: {}", e))?;
         Ok(())
+    }
+
+    /// 在可执行文件所在目录查找指定名称的可执行文件
+    pub fn locate_exe(&self, name: &str) -> Option<PathBuf> {
+        let exe_dir = self.config_dir.parent()?;
+        let filename = if cfg!(target_os = "windows") {
+            format!("{}.exe", name)
+        } else {
+            name.to_string()
+        };
+        let path = exe_dir.join(&filename);
+        if path.exists() {
+            Some(path)
+        } else {
+            None
+        }
+    }
+
+    /// 自动检测 llama-server 路径
+    pub fn auto_detect_server_path(&self) -> Option<PathBuf> {
+        self.locate_exe("llama-server")
+    }
+
+    /// 自动检测 rpc-server 路径
+    pub fn auto_detect_rpc_path(&self) -> Option<PathBuf> {
+        self.locate_exe("rpc-server")
     }
 }

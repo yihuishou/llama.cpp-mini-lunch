@@ -45,4 +45,36 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings) {
     } else {
         ui.colored_label(egui::Color32::RED, "尚未选择模型文件");
     }
+
+    // 多模态投影文件
+    ui.add_space(12.0);
+    ui.heading("多模态");
+    ui.separator();
+
+    ui.horizontal(|ui| {
+        ui.label("mmproj 投影文件:");
+        if ui.button("浏览...").clicked() {
+            if let Some(path) = rfd::FileDialog::new()
+                .set_title("选择 mmproj 投影文件")
+                .add_filter("投影文件", &["gguf", "bin"])
+                .pick_file()
+            {
+                settings.mmproj_path = path;
+            }
+        }
+    });
+
+    let mut mmproj_path_str = settings.mmproj_path.to_string_lossy().to_string();
+    let response = ui.text_edit_singleline(&mut mmproj_path_str);
+    if response.changed() {
+        settings.mmproj_path = std::path::PathBuf::from(&mmproj_path_str);
+    }
+
+    // mmproj 路径验证提示
+    if !settings.mmproj_path.as_os_str().is_empty() {
+        let exists = settings.mmproj_path.exists();
+        let (icon, color) = if exists { ("✓", egui::Color32::from_rgb(110, 255, 140)) }
+            else { ("✗", egui::Color32::from_rgb(255, 100, 100)) };
+        ui.colored_label(color, format!("{} {}", icon, if exists { "文件存在" } else { "文件不存在" }));
+    }
 }

@@ -179,8 +179,8 @@ impl eframe::App for LlamaLunchApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             match self.tab_selected.as_str() {
-                "Server" => server_panel::ui(ui, &mut self.settings),
-                "RPC" => rpc_panel::ui(ui, &mut self.settings),
+                "Server" => server_panel::ui(ui, &mut self.settings, &self.settings_manager),
+                "RPC" => rpc_panel::ui(ui, &mut self.settings, &self.settings_manager),
                 "模型" => model_panel::ui(ui, &mut self.settings),
                 "参数" => params_panel::ui(ui, &mut self.settings),
                 "预设" => preset_panel::ui(ui, &mut self.settings, &mut self.settings_manager),

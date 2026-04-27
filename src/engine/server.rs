@@ -105,6 +105,11 @@ impl ServerManager {
             .arg("--top-k").arg(settings.top_k.to_string())
             .arg("--repeat-penalty").arg(settings.repeat_penalty.to_string());
 
+        // 多模态投影
+        if !settings.mmproj_path.as_os_str().is_empty() {
+            cmd.arg("--mmproj").arg(&settings.mmproj_path);
+        }
+
         // KV 缓存配置
         if settings.kv_offload {
             cmd.arg("-kvo");
