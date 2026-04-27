@@ -55,7 +55,7 @@ impl RpcManager {
 
     pub fn status_text(&self, lang: &i18n::Language) -> String {
         match &self.state {
-            RpcState::Idle => i18n::t(i18n::Key::StatusNotStarted, lang).to_string(),
+            RpcState::Idle => i18n::t(i18n::Key::StatusIdle, lang).to_string(),
             RpcState::Starting => i18n::t(i18n::Key::StatusStarting, lang).to_string(),
             RpcState::Running => i18n::t(i18n::Key::StatusRunning, lang).to_string(),
             RpcState::Stopping => i18n::t(i18n::Key::StatusStopping, lang).to_string(),
