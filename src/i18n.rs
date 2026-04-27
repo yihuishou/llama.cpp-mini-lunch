@@ -23,7 +23,6 @@ pub enum Key {
     TabRpc,
     TabModel,
     TabParams,
-    TabPreset,
     TabLog,
 
     // 按钮
@@ -35,9 +34,6 @@ pub enum Key {
     BtnAutoDetect,
     BtnClearLogs,
     BtnClose,
-    BtnSavePreset,
-    BtnLoad,
-    BtnDelete,
 
     // 状态
     StatusProcessing,
@@ -114,12 +110,6 @@ pub enum Key {
     SectionParamsHelp,
     ParamsHelpText,
 
-    // 预设面板
-    PanelPresetTitle,
-    LabelPresetName,
-    SectionPresetList,
-    HintNoPresets,
-
     // 日志面板
     PanelLogTitle,
     HintLogSession,
@@ -166,8 +156,7 @@ impl Key {
             (Key::TabModel, &Language::En) => "Model",
             (Key::TabParams, &Language::Zh) => "参数",
             (Key::TabParams, &Language::En) => "Params",
-            (Key::TabPreset, &Language::Zh) => "预设",
-            (Key::TabPreset, &Language::En) => "Presets",
+ 
             (Key::TabLog, &Language::Zh) => "日志",
             (Key::TabLog, &Language::En) => "Logs",
 
@@ -186,14 +175,8 @@ impl Key {
             (Key::BtnAutoDetect, &Language::En) => "Auto Detect",
             (Key::BtnClearLogs, &Language::Zh) => "清空日志",
             (Key::BtnClearLogs, &Language::En) => "Clear Logs",
-            (Key::BtnClose, &Language::Zh) => "关闭",
+          (Key::BtnClose, &Language::Zh) => "关闭",
             (Key::BtnClose, &Language::En) => "Close",
-            (Key::BtnSavePreset, &Language::Zh) => "保存预设",
-            (Key::BtnSavePreset, &Language::En) => "Save Preset",
-            (Key::BtnLoad, &Language::Zh) => "加载",
-            (Key::BtnLoad, &Language::En) => "Load",
-            (Key::BtnDelete, &Language::Zh) => "删除",
-            (Key::BtnDelete, &Language::En) => "Delete",
 
             // 状态
             (Key::StatusProcessing, &Language::Zh) => "处理中...",
@@ -351,17 +334,7 @@ impl Key {
  GPU Layers: Number of model layers stored in VRAM\n\
  Split Mode: layer, none (single GPU), row, tensor\n\
  Tensor Split: Multi-GPU offload ratio\n\
- CPU MoE: Keep MoE weights on CPU",
-
-            // 预设面板
-            (Key::PanelPresetTitle, &Language::Zh) => "配置预设",
-            (Key::PanelPresetTitle, &Language::En) => "Config Presets",
-            (Key::LabelPresetName, &Language::Zh) => "预设名称:",
-            (Key::LabelPresetName, &Language::En) => "Preset Name:",
-            (Key::SectionPresetList, &Language::Zh) => "预设列表",
-            (Key::SectionPresetList, &Language::En) => "Preset List",
-            (Key::HintNoPresets, &Language::Zh) => "暂无预设配置",
-            (Key::HintNoPresets, &Language::En) => "No presets configured",
+          CPU MoE: Keep MoE weights on CPU",
 
             // 日志面板
             (Key::PanelLogTitle, &Language::Zh) => "运行日志",

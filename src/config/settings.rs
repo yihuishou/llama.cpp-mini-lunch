@@ -4,8 +4,6 @@ use std::path::{Path, PathBuf};
 
 const CONFIG_DIR: &str = "llama_lunch";
 const CONFIG_FILE: &str = "settings.json";
-const PRESETS_DIR: &str = "presets";
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppSettings {
     // Server 配置
@@ -86,12 +84,6 @@ impl Default for AppSettings {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Preset {
-    pub name: String,
-    pub settings: AppSettings,
-}
-
 pub struct SettingsManager {
     config_dir: PathBuf,
 }
@@ -104,7 +96,6 @@ impl SettingsManager {
             .join(CONFIG_DIR);
 
         fs::create_dir_all(&config_dir).ok();
-        fs::create_dir_all(config_dir.join(PRESETS_DIR)).ok();
 
         Self { config_dir }
     }
@@ -126,42 +117,7 @@ impl SettingsManager {
         Ok(())
     }
 
-    pub fn list_presets(&self) -> Vec<Preset> {
-        let presets_dir = self.config_dir.join(PRESETS_DIR);
-        let mut presets = Vec::new();
-
-        if let Ok(entries) = fs::read_dir(&presets_dir) {
-            for entry in entries.flatten() {
-                let path = entry.path();
-                if path.extension().map_or(false, |ext| ext == "json") {
-                    if let Ok(content) = fs::read_to_string(&path) {
-                        if let Ok(preset) = serde_json::from_str::<Preset>(&content) {
-                            presets.push(preset);
-                        }
-                    }
-                }
-            }
-        }
-
-        presets.sort_by(|a, b| a.name.cmp(&b.name));
-        presets
-    }
-
-    pub fn save_preset(&self, preset: &Preset) -> Result<(), String> {
-        let path = self.config_dir.join(PRESETS_DIR).join(format!("{}.json", preset.name));
-        let content = serde_json::to_string_pretty(preset)
-            .map_err(|e| format!("序列化预设失败: {}", e))?;
-        fs::write(&path, content).map_err(|e| format!("写入预设失败: {}", e))?;
-        Ok(())
-    }
-
-    pub fn delete_preset(&self, name: &str) -> Result<(), String> {
-        let path = self.config_dir.join(PRESETS_DIR).join(format!("{}.json", name));
-        fs::remove_file(&path).map_err(|e| format!("删除预设失败: {}", e))?;
-        Ok(())
-    }
-
-  /// 在可执行文件所在目录查找指定名称的可执行文件
+    /// 在可执行文件所在目录查找指定名称的可执行文件
     pub fn locate_exe(&self, name: &str) -> Option<PathBuf> {
         let exe_dir = self.config_dir.parent()?;
         let filename = if cfg!(target_os = "windows") {

@@ -3,7 +3,7 @@ use crate::engine::rpc::{RpcManager, RpcState};
 use crate::engine::server::{ServerManager, ServerState};
 use crate::i18n::{self, Language};
 use crate::theme::{ThemeManager, ThemeVariant};
-use crate::ui::{log_panel, model_panel, params_panel, preset_panel, rpc_panel, server_panel};
+use crate::ui::{log_panel, model_panel, params_panel, rpc_panel, server_panel};
 
 pub struct LlamaLunchApp {
     settings: AppSettings,
@@ -142,7 +142,6 @@ impl eframe::App for LlamaLunchApp {
                     i18n::t(i18n::Key::TabRpc, &self.lang),
                     i18n::t(i18n::Key::TabModel, &self.lang),
                     i18n::t(i18n::Key::TabParams, &self.lang),
-                    i18n::t(i18n::Key::TabPreset, &self.lang),
                     i18n::t(i18n::Key::TabLog, &self.lang),
                 ];
                 for tab in &tabs {
@@ -203,9 +202,9 @@ impl eframe::App for LlamaLunchApp {
                 tab if tab == i18n::t(i18n::Key::TabServer, &self.lang) => server_panel::ui(ui, &mut self.settings, &self.settings_manager, &self.lang),
                 tab if tab == i18n::t(i18n::Key::TabRpc, &self.lang) => rpc_panel::ui(ui, &mut self.settings, &self.settings_manager, &self.lang),
                 tab if tab == i18n::t(i18n::Key::TabModel, &self.lang) => model_panel::ui(ui, &mut self.settings, &self.lang),
-                tab if tab == i18n::t(i18n::Key::TabParams, &self.lang) => params_panel::ui(ui, &mut self.settings, &self.lang),
-                tab if tab == i18n::t(i18n::Key::TabPreset, &self.lang) => preset_panel::ui(ui, &mut self.settings, &mut self.settings_manager, &self.lang),
-                tab if tab == i18n::t(i18n::Key::TabLog, &self.lang) => log_panel::ui(ui, &mut self.server_manager, &self.lang),
+              tab if tab == i18n::t(i18n::Key::TabParams, &self.lang) => params_panel::ui(ui, &mut self.settings, &self.lang),
+                 tab if tab == i18n::t(i18n::Key::TabLog, &self.lang) => log_panel::ui(ui, &mut self.server_manager, &self.lang),
+
                 _ => { ui.label(i18n::t(i18n::Key::GenericSelectModule, &self.lang)); },
             }
         });
