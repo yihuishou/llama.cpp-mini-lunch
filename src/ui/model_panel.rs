@@ -1,17 +1,18 @@
 use crate::config::settings::AppSettings;
+use crate::i18n;
 use std::fs;
 
-pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings) {
-    ui.heading("模型管理");
+pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, lang: &i18n::Language) {
+    ui.heading(i18n::t(i18n::Key::PanelModelTitle, lang));
     ui.separator();
 
     // 当前模型
     ui.horizontal(|ui| {
-        ui.label("GGUF 模型文件:");
-        if ui.button("浏览...").clicked() {
+        ui.label(i18n::t(i18n::Key::LabelModelPath, lang));
+        if ui.button(i18n::t(i18n::Key::BtnBrowse, lang)).clicked() {
             if let Some(path) = rfd::FileDialog::new()
-                .set_title("选择 GGUF 模型文件")
-                .add_filter("GGUF 模型", &["gguf"])
+                .set_title(i18n::t(i18n::Key::DialogSelectModel, lang))
+                .add_filter(i18n::t(i18n::Key::FilterGguf, lang), &["gguf"])
                 .pick_file()
             {
                 settings.model_path = path;
@@ -31,32 +32,29 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings) {
     if !settings.model_path.as_os_str().is_empty() {
         if let Ok(metadata) = fs::metadata(&settings.model_path) {
             let size_mb = metadata.len() as f64 / (1024.0 * 1024.0);
-            ui.label(format!(
-                "文件: {} ( {:.2} MB )",
-                settings.model_path
-                    .file_name()
-                    .map(|s| s.to_string_lossy().to_string())
-                    .unwrap_or_default(),
-                size_mb
-            ));
+            let filename = settings.model_path
+                .file_name()
+                .map(|s| s.to_string_lossy().to_string())
+                .unwrap_or_default();
+            ui.label(format!("{}: {} ({:.2} MB)", i18n::t(i18n::Key::LabelFile, lang), filename, size_mb));
         } else {
-            ui.colored_label(egui::Color32::RED, "文件不存在或无法访问");
+            ui.colored_label(egui::Color32::RED, i18n::t(i18n::Key::ModelNotExist, lang));
         }
     } else {
-        ui.colored_label(egui::Color32::RED, "尚未选择模型文件");
+        ui.colored_label(egui::Color32::RED, i18n::t(i18n::Key::ModelNotSelected, lang));
     }
 
     // 多模态投影文件
     ui.add_space(12.0);
-    ui.heading("多模态");
+    ui.heading(i18n::t(i18n::Key::SectionMultimodal, lang));
     ui.separator();
 
     ui.horizontal(|ui| {
-        ui.label("mmproj 投影文件:");
-        if ui.button("浏览...").clicked() {
+        ui.label(i18n::t(i18n::Key::LabelMmprojPath, lang));
+        if ui.button(i18n::t(i18n::Key::BtnBrowse, lang)).clicked() {
             if let Some(path) = rfd::FileDialog::new()
-                .set_title("选择 mmproj 投影文件")
-                .add_filter("投影文件", &["gguf", "bin"])
+                .set_title(i18n::t(i18n::Key::DialogSelectMmproj, lang))
+                .add_filter(i18n::t(i18n::Key::FilterMmproj, lang), &["gguf", "bin"])
                 .pick_file()
             {
                 settings.mmproj_path = path;
@@ -75,6 +73,6 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings) {
         let exists = settings.mmproj_path.exists();
         let (icon, color) = if exists { ("✓", egui::Color32::from_rgb(110, 255, 140)) }
             else { ("✗", egui::Color32::from_rgb(255, 100, 100)) };
-        ui.colored_label(color, format!("{} {}", icon, if exists { "文件存在" } else { "文件不存在" }));
+        ui.colored_label(color, format!("{} {}", icon, if exists { i18n::t(i18n::Key::FileExists, lang) } else { i18n::t(i18n::Key::FileNotExists, lang) }));
     }
 }

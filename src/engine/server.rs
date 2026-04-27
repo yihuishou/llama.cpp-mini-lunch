@@ -1,4 +1,5 @@
 use crate::config::settings::AppSettings;
+use crate::i18n;
 use std::io::{BufRead, BufReader};
 use std::process::{Child, Command};
 use std::sync::{Arc, Mutex};
@@ -57,13 +58,13 @@ impl ServerManager {
         matches!(self.state, ServerState::Running)
     }
 
-    pub fn status_text(&self) -> String {
+    pub fn status_text(&self, lang: &i18n::Language) -> String {
         match &self.state {
-            ServerState::Idle => "已停止".to_string(),
-            ServerState::Starting => "启动中".to_string(),
-            ServerState::Running => "运行中".to_string(),
-            ServerState::Stopping => "停止中".to_string(),
-            ServerState::Error(msg) => format!("错误: {}", msg),
+            ServerState::Idle => i18n::t(i18n::Key::StatusIdle, lang).to_string(),
+            ServerState::Starting => i18n::t(i18n::Key::StatusStarting, lang).to_string(),
+            ServerState::Running => i18n::t(i18n::Key::StatusRunning, lang).to_string(),
+            ServerState::Stopping => i18n::t(i18n::Key::StatusStopping, lang).to_string(),
+            ServerState::Error(msg) => format!("{}: {}", i18n::t(i18n::Key::StatusError, lang), msg),
         }
     }
 
@@ -84,7 +85,7 @@ impl ServerManager {
         let model_path = settings.model_path.clone();
 
         if server_path.as_os_str().is_empty() || model_path.as_os_str().is_empty() {
-            self.state = ServerState::Error("请先配置 Server 路径和模型路径".to_string());
+            self.state = ServerState::Error(i18n::t(i18n::Key::ErrServerModelMissing, &i18n::Language::En).to_string());
             return;
         }
 
@@ -156,20 +157,26 @@ impl ServerManager {
 
                 let inner_clone = Arc::clone(&self.inner);
                 let stdout_thread = thread::spawn(move || {
-                    let mut inner = inner_clone.lock().unwrap();
-                    if let Some(ref mut child) = inner.child {
-                        if let Some(stdout) = child.stdout.take() {
-                            let reader = BufReader::new(stdout);
-                            for line in reader.lines() {
-                                match line {
-                                    Ok(l) => {
-                                        inner.logs.push(LogEntry {
-                                            text: l,
-                                            level: LogLevel::Info,
-                                        });
-                                    }
-                                    Err(_) => break,
+                    let stdout = {
+                        let mut inner = inner_clone.lock().unwrap();
+                        if let Some(ref mut child) = inner.child {
+                            child.stdout.take()
+                        } else {
+                            None
+                        }
+                    };
+                    if let Some(stdout) = stdout {
+                        let reader = BufReader::new(stdout);
+                        for line in reader.lines() {
+                            match line {
+                                Ok(l) => {
+                                    let mut inner = inner_clone.lock().unwrap();
+                                    inner.logs.push(LogEntry {
+                                        text: l,
+                                        level: LogLevel::Info,
+                                    });
                                 }
+                                Err(_) => break,
                             }
                         }
                     }
@@ -177,27 +184,33 @@ impl ServerManager {
 
                 let inner_clone2 = Arc::clone(&self.inner);
                 let stderr_thread = thread::spawn(move || {
-                    let mut inner = inner_clone2.lock().unwrap();
-                    if let Some(ref mut child) = inner.child {
-                        if let Some(stderr) = child.stderr.take() {
-                            let reader = BufReader::new(stderr);
-                            for line in reader.lines() {
-                                match line {
-                                    Ok(l) => {
-                                        let level = if l.contains("WARN") || l.contains("warn") {
-                                            LogLevel::Warn
-                                        } else if l.contains("ERROR") || l.contains("error") {
-                                            LogLevel::Error
-                                        } else {
-                                            LogLevel::Warn
-                                        };
-                                        inner.logs.push(LogEntry {
-                                            text: l,
-                                            level,
-                                        });
-                                    }
-                                    Err(_) => break,
+                    let stderr = {
+                        let mut inner = inner_clone2.lock().unwrap();
+                        if let Some(ref mut child) = inner.child {
+                            child.stderr.take()
+                        } else {
+                            None
+                        }
+                    };
+                    if let Some(stderr) = stderr {
+                        let reader = BufReader::new(stderr);
+                        for line in reader.lines() {
+                            match line {
+                                Ok(l) => {
+                                    let level = if l.contains("WARN") || l.contains("warn") {
+                                        LogLevel::Warn
+                                    } else if l.contains("ERROR") || l.contains("error") {
+                                        LogLevel::Error
+                                    } else {
+                                        LogLevel::Warn
+                                    };
+                                    let mut inner = inner_clone2.lock().unwrap();
+                                    inner.logs.push(LogEntry {
+                                        text: l,
+                                        level,
+                                    });
                                 }
+                                Err(_) => break,
                             }
                         }
                     }
@@ -207,7 +220,7 @@ impl ServerManager {
                 self._threads.push(stderr_thread);
             }
             Err(e) => {
-                self.state = ServerState::Error(format!("启动失败: {}", e));
+                self.state = ServerState::Error(format!("{}: {}", i18n::t(i18n::Key::ErrStartFailed, &i18n::Language::En), e));
             }
         }
     }
@@ -227,9 +240,9 @@ impl ServerManager {
         if let Some(ref mut child) = inner.child {
             if let Ok(Some(status)) = child.try_wait() {
                 let exit_msg = if status.success() {
-                    "Server 进程已正常退出".to_string()
+                    i18n::t(i18n::Key::StatusServerExited, &i18n::Language::En).to_string()
                 } else {
-                    format!("Server 进程异常退出: {:?}", status.code())
+                    format!("{}: {:?}", i18n::t(i18n::Key::StatusServerCrashed, &i18n::Language::En), status.code())
                 };
                 inner.logs.push(LogEntry {
                     text: exit_msg,

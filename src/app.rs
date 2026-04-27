@@ -1,6 +1,7 @@
 use crate::config::settings::{AppSettings, SettingsManager};
 use crate::engine::rpc::{RpcManager, RpcState};
 use crate::engine::server::{ServerManager, ServerState};
+use crate::i18n::{self, Language};
 use crate::theme::{ThemeManager, ThemeVariant};
 use crate::ui::{log_panel, model_panel, params_panel, preset_panel, rpc_panel, server_panel};
 
@@ -13,12 +14,20 @@ pub struct LlamaLunchApp {
     show_about: bool,
     theme_variant: ThemeVariant,
     theme_manager: ThemeManager,
+    lang: Language,
 }
 
 impl LlamaLunchApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let settings_manager = SettingsManager::new();
-        let settings = settings_manager.load().unwrap_or_default();
+        let mut settings = settings_manager.load().unwrap_or_default();
+        settings_manager.init_language(&mut settings);
+        let lang = if settings.language == "zh" {
+            Language::Zh
+        } else {
+            Language::En
+        };
+
         let server_manager = ServerManager::new();
         let rpc_manager = RpcManager::new();
         let mut theme_manager = ThemeManager::new();
@@ -36,6 +45,7 @@ impl LlamaLunchApp {
             show_about: false,
             theme_variant: ThemeVariant::Latte,
             theme_manager,
+            lang,
         }
     }
 
@@ -52,19 +62,19 @@ impl LlamaLunchApp {
         match server_state {
             ServerState::Idle | ServerState::Error(_) => {
                 if ui
-                    .add_enabled(!self.settings.model_path.as_os_str().is_empty(), egui::Button::new("启动 Server").fill(start_fill))
+                    .add_enabled(!self.settings.model_path.as_os_str().is_empty(), egui::Button::new(i18n::t(i18n::Key::BtnStartServer, &self.lang)).fill(start_fill))
                     .clicked
                 {
                     self.server_manager.start(&self.settings);
                 }
             }
             ServerState::Running => {
-                if ui.add(egui::Button::new("停止 Server").fill(stop_fill)).clicked {
+                if ui.add(egui::Button::new(i18n::t(i18n::Key::BtnStopServer, &self.lang)).fill(stop_fill)).clicked {
                     self.server_manager.stop();
                 }
             }
             ServerState::Starting | ServerState::Stopping => {
-                ui.label("处理中...");
+                ui.label(i18n::t(i18n::Key::StatusProcessing, &self.lang));
             }
         }
     }
@@ -76,19 +86,19 @@ impl LlamaLunchApp {
         match rpc_state {
             RpcState::Idle | RpcState::Error(_) => {
                 if ui
-                    .add_enabled(!self.settings.rpc_server_path.as_os_str().is_empty(), egui::Button::new("启动 RPC").fill(rpc_start_fill))
+                    .add_enabled(!self.settings.rpc_server_path.as_os_str().is_empty(), egui::Button::new(i18n::t(i18n::Key::BtnStartRpc, &self.lang)).fill(rpc_start_fill))
                     .clicked
                 {
                     self.rpc_manager.start(&self.settings);
                 }
             }
             RpcState::Running => {
-                if ui.add(egui::Button::new("停止 RPC").fill(rpc_stop_fill)).clicked {
+                if ui.add(egui::Button::new(i18n::t(i18n::Key::BtnStopRpc, &self.lang)).fill(rpc_stop_fill)).clicked {
                     self.rpc_manager.stop();
                 }
             }
             RpcState::Starting | RpcState::Stopping => {
-                ui.label("处理中...");
+                ui.label(i18n::t(i18n::Key::StatusProcessing, &self.lang));
             }
         }
     }
@@ -100,22 +110,26 @@ impl eframe::App for LlamaLunchApp {
         self.rpc_manager.poll();
 
         if self.show_about {
-            egui::Window::new("关于").collapsible(false).resizable(false).anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0]).show(ctx, |ui| {
-                ui.label("Llama Lunch v0.1.0");
-                ui.label("llama-server 图形启动器");
-                if ui.button("关闭").clicked() {
-                    self.show_about = false;
-                }
-            });
+            egui::Window::new(i18n::t(i18n::Key::AboutTitle, &self.lang))
+                .collapsible(false)
+                .resizable(false)
+                .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+                .show(ctx, |ui| {
+                    ui.label(i18n::t(i18n::Key::AboutVersion, &self.lang));
+                    ui.label(i18n::t(i18n::Key::AboutDescription, &self.lang));
+                    if ui.button(i18n::t(i18n::Key::BtnClose, &self.lang)).clicked() {
+                        self.show_about = false;
+                    }
+                });
         }
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
-                ui.menu_button("文件", |ui| {
-                    if ui.button("保存配置").clicked() {
+                ui.menu_button(i18n::t(i18n::Key::MenuFile, &self.lang), |ui| {
+                    if ui.button(i18n::t(i18n::Key::MenuItemSaveConfig, &self.lang)).clicked() {
                         self.save();
                     }
-                    if ui.button("加载配置").clicked() {
+                    if ui.button(i18n::t(i18n::Key::MenuItemLoadConfig, &self.lang)).clicked() {
                         if let Ok(s) = self.settings_manager.load() {
                             self.settings = s;
                         }
@@ -123,7 +137,14 @@ impl eframe::App for LlamaLunchApp {
                 });
 
                 // 标签页切换
-                let tabs = ["Server", "RPC", "模型", "参数", "预设", "日志"];
+                let tabs = [
+                    i18n::t(i18n::Key::TabServer, &self.lang),
+                    i18n::t(i18n::Key::TabRpc, &self.lang),
+                    i18n::t(i18n::Key::TabModel, &self.lang),
+                    i18n::t(i18n::Key::TabParams, &self.lang),
+                    i18n::t(i18n::Key::TabPreset, &self.lang),
+                    i18n::t(i18n::Key::TabLog, &self.lang),
+                ];
                 for tab in &tabs {
                     let selected = self.tab_selected == *tab;
                     if ui.selectable_label(selected, *tab).clicked() {
@@ -139,7 +160,7 @@ impl eframe::App for LlamaLunchApp {
 
                 ui.separator();
 
-                ui.menu_button("主题", |ui| {
+                ui.menu_button(i18n::t(i18n::Key::MenuTheme, &self.lang), |ui| {
                     for variant in ThemeVariant::all_variants() {
                         let selected = self.theme_variant == variant;
                         let label = if selected {
@@ -153,21 +174,21 @@ impl eframe::App for LlamaLunchApp {
                         }
                     }
                 });
-                ui.menu_button("帮助", |ui| {
-                    if ui.button("关于").clicked() {
+                ui.menu_button(i18n::t(i18n::Key::MenuHelp, &self.lang), |ui| {
+                    if ui.button(i18n::t(i18n::Key::MenuItemAbout, &self.lang)).clicked() {
                         self.show_about = true;
                     }
                 });
 
                 ui.separator();
-                let status = self.server_manager.status_text();
+                let status = self.server_manager.status_text(&self.lang);
                 let color = if self.server_manager.is_running() {
                     egui::Color32::from_rgb(110, 255, 140)
                 } else {
                     egui::Color32::GRAY
                 };
                 ui.colored_label(color, format!("[Server: {}]", status));
-                let rpc_status = self.rpc_manager.status_text();
+                let rpc_status = self.rpc_manager.status_text(&self.lang);
                 let rpc_color = if self.rpc_manager.is_running() {
                     egui::Color32::from_rgb(110, 255, 140)
                 } else {
@@ -179,17 +200,17 @@ impl eframe::App for LlamaLunchApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             match self.tab_selected.as_str() {
-                "Server" => server_panel::ui(ui, &mut self.settings, &self.settings_manager),
-                "RPC" => rpc_panel::ui(ui, &mut self.settings, &self.settings_manager),
-                "模型" => model_panel::ui(ui, &mut self.settings),
-                "参数" => params_panel::ui(ui, &mut self.settings),
-                "预设" => preset_panel::ui(ui, &mut self.settings, &mut self.settings_manager),
-                "日志" => log_panel::ui(ui, &mut self.server_manager),
-                _ => { ui.label("请选择一个功能模块"); },
+                tab if tab == i18n::t(i18n::Key::TabServer, &self.lang) => server_panel::ui(ui, &mut self.settings, &self.settings_manager, &self.lang),
+                tab if tab == i18n::t(i18n::Key::TabRpc, &self.lang) => rpc_panel::ui(ui, &mut self.settings, &self.settings_manager, &self.lang),
+                tab if tab == i18n::t(i18n::Key::TabModel, &self.lang) => model_panel::ui(ui, &mut self.settings, &self.lang),
+                tab if tab == i18n::t(i18n::Key::TabParams, &self.lang) => params_panel::ui(ui, &mut self.settings, &self.lang),
+                tab if tab == i18n::t(i18n::Key::TabPreset, &self.lang) => preset_panel::ui(ui, &mut self.settings, &mut self.settings_manager, &self.lang),
+                tab if tab == i18n::t(i18n::Key::TabLog, &self.lang) => log_panel::ui(ui, &mut self.server_manager, &self.lang),
+                _ => { ui.label(i18n::t(i18n::Key::GenericSelectModule, &self.lang)); },
             }
         });
 
-        ctx.request_repaint();
+        ctx.request_repaint_after(std::time::Duration::from_millis(500));
     }
 }
 

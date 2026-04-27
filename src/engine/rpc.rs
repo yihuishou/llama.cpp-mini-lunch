@@ -1,4 +1,5 @@
 use crate::config::settings::AppSettings;
+use crate::i18n;
 use std::io::{BufRead, BufReader};
 use std::process::{Child, Command};
 use std::sync::{Arc, Mutex};
@@ -52,13 +53,13 @@ impl RpcManager {
         matches!(self.state, RpcState::Running)
     }
 
-    pub fn status_text(&self) -> String {
+    pub fn status_text(&self, lang: &i18n::Language) -> String {
         match &self.state {
-            RpcState::Idle => "未启动".to_string(),
-            RpcState::Starting => "启动中".to_string(),
-            RpcState::Running => "运行中".to_string(),
-            RpcState::Stopping => "停止中".to_string(),
-            RpcState::Error(msg) => format!("错误: {}", msg),
+            RpcState::Idle => i18n::t(i18n::Key::StatusNotStarted, lang).to_string(),
+            RpcState::Starting => i18n::t(i18n::Key::StatusStarting, lang).to_string(),
+            RpcState::Running => i18n::t(i18n::Key::StatusRunning, lang).to_string(),
+            RpcState::Stopping => i18n::t(i18n::Key::StatusStopping, lang).to_string(),
+            RpcState::Error(msg) => format!("{}: {}", i18n::t(i18n::Key::StatusError, lang), msg),
         }
     }
 
@@ -79,12 +80,12 @@ impl RpcManager {
         let rpc_path = settings.rpc_server_path.clone();
 
         if rpc_path.as_os_str().is_empty() {
-            self.state = RpcState::Error("请先配置 rpc-server 路径".to_string());
+            self.state = RpcState::Error(i18n::t(i18n::Key::ErrRpcPathMissing, &i18n::Language::En).to_string());
             return;
         }
 
         if !self.check_rpc_server(&rpc_path) {
-            self.state = RpcState::Error("rpc-server.exe 文件不存在".to_string());
+            self.state = RpcState::Error(i18n::t(i18n::Key::ErrRpcFileNotFound, &i18n::Language::En).to_string());
             return;
         }
 
@@ -119,15 +120,20 @@ impl RpcManager {
 
                 let inner_clone = Arc::clone(&self.inner);
                 let stdout_thread = thread::spawn(move || {
-                    let mut inner = inner_clone.lock().unwrap();
-                    if let Some(ref mut child) = inner.child {
-                        if let Some(stdout) = child.stdout.take() {
-                            let reader = BufReader::new(stdout);
-                            for line in reader.lines() {
-                                match line {
-                                    Ok(_) => {}
-                                    Err(_) => break,
-                                }
+                    let stdout = {
+                        let mut inner = inner_clone.lock().unwrap();
+                        if let Some(ref mut child) = inner.child {
+                            child.stdout.take()
+                        } else {
+                            None
+                        }
+                    };
+                    if let Some(stdout) = stdout {
+                        let reader = BufReader::new(stdout);
+                        for line in reader.lines() {
+                            match line {
+                                Ok(_) => {}
+                                Err(_) => break,
                             }
                         }
                     }
@@ -136,7 +142,7 @@ impl RpcManager {
                 self._threads.push(stdout_thread);
             }
             Err(e) => {
-                self.state = RpcState::Error(format!("启动失败: {}", e));
+                self.state = RpcState::Error(format!("{}: {}", i18n::t(i18n::Key::ErrStartFailed, &i18n::Language::En), e));
                 self.connection = RpcConnection::Disconnected;
             }
         }
@@ -162,7 +168,7 @@ impl RpcManager {
                 if status.success() {
                     self.state = RpcState::Idle;
                 } else {
-                    self.state = RpcState::Error(format!("进程异常退出: {:?}", status.code()));
+                    self.state = RpcState::Error(format!("{}: {:?}", i18n::t(i18n::Key::StatusRpcCrashed, &i18n::Language::En), status.code()));
                 }
                 self.connection = RpcConnection::Disconnected;
             }

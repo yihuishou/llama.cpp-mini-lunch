@@ -1,22 +1,23 @@
 use crate::config::settings::{AppSettings, SettingsManager};
+use crate::i18n;
 
-pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, settings_manager: &SettingsManager) {
-    ui.heading("Server 配置");
+pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, settings_manager: &SettingsManager, lang: &i18n::Language) {
+    ui.heading(i18n::t(i18n::Key::PanelServerTitle, lang));
     ui.separator();
 
     // 二进制路径
     ui.horizontal(|ui| {
-        ui.label("llama-server 路径:");
-        if ui.button("浏览...").clicked() {
+        ui.label(i18n::t(i18n::Key::LabelServerPath, lang));
+        if ui.button(i18n::t(i18n::Key::BtnBrowse, lang)).clicked() {
             if let Some(path) = rfd::FileDialog::new()
-                .set_title("选择 llama-server 可执行文件")
-                .add_filter("可执行文件", &["exe"])
+                .set_title(i18n::t(i18n::Key::DialogSelectServer, lang))
+                .add_filter(i18n::t(i18n::Key::FilterExecutable, lang), &["exe"])
                 .pick_file()
             {
                 settings.server_path = path;
             }
         }
-        if ui.button("自动检测").clicked() {
+        if ui.button(i18n::t(i18n::Key::BtnAutoDetect, lang)).clicked() {
             if let Some(path) = settings_manager.auto_detect_server_path() {
                 settings.server_path = path;
             } else {
@@ -34,9 +35,9 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, settings_manager: &Sett
 
     // 监听地址
     ui.horizontal(|ui| {
-        ui.label("主机:");
+        ui.label(i18n::t(i18n::Key::LabelHost, lang));
         ui.text_edit_singleline(&mut settings.host);
-        ui.label("端口:");
+        ui.label(i18n::t(i18n::Key::LabelPort, lang));
         ui.add(egui::DragValue::new(&mut settings.port).range(1..=65535));
     });
 
@@ -44,17 +45,17 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, settings_manager: &Sett
 
     // 并行槽位
     ui.horizontal(|ui| {
-        ui.label("并发数量:");
+        ui.label(i18n::t(i18n::Key::LabelParallelSlots, lang));
         ui.add(egui::DragValue::new(&mut settings.parallel_slots).range(1..=32));
     });
 
     // GPU 层数
     ui.horizontal(|ui| {
-        ui.label("GPU 层数 (n-gpu-layers):");
+        ui.label(i18n::t(i18n::Key::LabelGpuLayers, lang));
         ui.text_edit_singleline(&mut settings.gpu_layers_str);
-        ui.small("(数字/自动/全部)");
+        ui.small(i18n::t(i18n::Key::HintGpuLayers, lang));
     });
 
     ui.add_space(8.0);
-    ui.checkbox(&mut settings.verbose, "详细输出 (verbose)");
+    ui.checkbox(&mut settings.verbose, i18n::t(i18n::Key::CheckboxVerbose, lang));
 }

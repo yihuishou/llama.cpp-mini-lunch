@@ -49,6 +49,9 @@ pub struct AppSettings {
 
     // 高级
     pub verbose: bool,
+
+    // 界面
+    pub language: String,
 }
 
 impl Default for AppSettings {
@@ -82,6 +85,7 @@ impl Default for AppSettings {
             rpc_device: "".to_string(),
             rpc_cache: false,
             verbose: false,
+            language: String::new(),
         }
     }
 }
@@ -159,6 +163,23 @@ impl SettingsManager {
         let path = self.config_dir.join(PRESETS_DIR).join(format!("{}.json", name));
         fs::remove_file(&path).map_err(|e| format!("删除预设失败: {}", e))?;
         Ok(())
+    }
+
+    /// 初始化语言设置，若为空则检测系统语言
+    pub fn init_language(&self, settings: &mut AppSettings) {
+        if settings.language.is_empty() {
+            // 检查 LANG 环境变量
+            if let Ok(lang) = std::env::var("LANG") {
+                if lang.starts_with("zh") {
+                    settings.language = "zh".to_string();
+                    return;
+                } else {
+                    settings.language = "en".to_string();
+                    return;
+                }
+            }
+            settings.language = "en".to_string();
+        }
     }
 
     /// 在可执行文件所在目录查找指定名称的可执行文件

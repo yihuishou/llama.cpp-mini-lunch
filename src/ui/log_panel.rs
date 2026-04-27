@@ -1,14 +1,15 @@
 use crate::engine::server::{LogLevel, ServerManager};
+use crate::i18n;
 
-pub fn ui(ui: &mut egui::Ui, manager: &mut ServerManager) {
-    ui.heading("运行日志");
+pub fn ui(ui: &mut egui::Ui, manager: &mut ServerManager, lang: &i18n::Language) {
+    ui.heading(i18n::t(i18n::Key::PanelLogTitle, lang));
     ui.separator();
 
     ui.horizontal(|ui| {
-        if ui.small_button("清空日志").clicked() {
+        if ui.small_button(i18n::t(i18n::Key::BtnClearLogs, lang)).clicked() {
             manager.clear_logs();
         }
-        ui.small("日志仅在当前会话中保留");
+        ui.small(i18n::t(i18n::Key::HintLogSession, lang));
     });
 
     ui.add_space(8.0);
@@ -18,7 +19,7 @@ pub fn ui(ui: &mut egui::Ui, manager: &mut ServerManager) {
         if logs.is_empty() {
             ui.add_space(20.0);
             ui.horizontal_centered(|ui| {
-                ui.colored_label(egui::Color32::GRAY, "暂无日志输出");
+                ui.colored_label(egui::Color32::GRAY, i18n::t(i18n::Key::HintNoLogs, lang));
             });
         } else {
             for entry in &logs {

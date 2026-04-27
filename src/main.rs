@@ -1,6 +1,7 @@
 mod app;
 mod config;
 mod engine;
+mod i18n;
 mod theme;
 mod ui;
 
@@ -13,12 +14,12 @@ fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size(egui::vec2(1100.0, 700.0))
-            .with_title("Llama Lunch"),
+            .with_title("llama.cpp lunch"),
         ..Default::default()
     };
 
     eframe::run_native(
-        "Llama Lunch",
+        "llama.cpp lunch",
         options,
         Box::new(|cc| {
             let fonts = load_custom_fonts();
