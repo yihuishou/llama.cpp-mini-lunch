@@ -165,21 +165,14 @@ impl SettingsManager {
         Ok(())
     }
 
-    /// 初始化语言设置，若为空则检测系统语言
+    /// 始终检测系统语言，不依赖缓存值
     pub fn init_language(&self, settings: &mut AppSettings) {
-        if settings.language.is_empty() {
-            // 检查 LANG 环境变量
-            if let Ok(lang) = std::env::var("LANG") {
-                if lang.starts_with("zh") {
-                    settings.language = "zh".to_string();
-                    return;
-                } else {
-                    settings.language = "en".to_string();
-                    return;
-                }
-            }
-            settings.language = "en".to_string();
-        }
+        let locale = sys_locale::get_locale().unwrap_or_default();
+        settings.language = if locale.starts_with("zh") {
+            "zh".to_string()
+        } else {
+            "en".to_string()
+        };
     }
 
     /// 在可执行文件所在目录查找指定名称的可执行文件
