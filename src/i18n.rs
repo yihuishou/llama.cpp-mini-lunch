@@ -211,8 +211,8 @@ impl Key {
             (Key::HintGpuLayers, &Language::En) => "(number/auto/all)",
             (Key::CheckboxVerbose, &Language::Zh) => "详细输出 (verbose)",
           (Key::CheckboxVerbose, &Language::En) => "Verbose output",
-            (Key::CheckboxRpcMode, &Language::Zh) => "RPC 模式 (--rpc)",
-            (Key::CheckboxRpcMode, &Language::En) => "RPC Mode (--rpc)",
+(Key::CheckboxRpcMode, &Language::Zh) => "RPC 模式",
+    (Key::CheckboxRpcMode, &Language::En) => "RPC Mode",
             (Key::LabelRpcEndpoints, &Language::Zh) => "RPC 节点地址:",
             (Key::LabelRpcEndpoints, &Language::En) => "RPC Endpoints:",
    (Key::HintRpcEndpoints, &Language::Zh) => "逗号分隔，如: 主机IP:端口,主机IP:端口",
@@ -281,7 +281,7 @@ impl Key {
             (Key::LabelRepeatPenalty, &Language::En) => "Repeat Penalty:",
             (Key::SectionKvCache, &Language::Zh) => "KV 缓存配置",
             (Key::SectionKvCache, &Language::En) => "KV Cache Config",
-            (Key::CheckboxKvOffload, &Language::Zh) => "KV 缓存卸载到 GPU",
+            (Key::CheckboxKvOffload, &Language::Zh) => "K/V 缓存卸载到 GPU",
             (Key::CheckboxKvOffload, &Language::En) => "KV Cache Offload to GPU",
             (Key::HintKvOffload, &Language::Zh) => "(默认开启)",
             (Key::HintKvOffload, &Language::En) => "(default: on)",
@@ -313,7 +313,7 @@ impl Key {
  Top P: 核采样阈值，只保留累积概率超过该值的token\n\
  Top K: 只保留概率最高的K个候选token\n\
  重复惩罚: 降低重复内容的概率\n\n\
- KV 缓存卸载: 允许将 KV 缓存卸载到 GPU\n\
+ K/V 缓存卸载: 允许将 K/V 缓存卸载到 GPU\n\
  K/V 缓存类型: 缓存数据类型 (f16, q8_0, q4_0)，使用量化类型可节省显存\n\n\
  GPU 层数: 存储在显存中的模型层数\n\
  拆分模式: layer(按层), none(单GPU), row(按行), tensor(按张量)\n\
