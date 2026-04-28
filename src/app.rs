@@ -61,8 +61,10 @@ impl LlamaLunchApp {
         let stop_fill = egui::Color32::from_rgb(180, 50, 50);
         match server_state {
             ServerState::Idle | ServerState::Error(_) => {
+                let can_start = !self.settings.server_path.as_os_str().is_empty()
+                    && !self.settings.model_path.as_os_str().is_empty();
                 if ui
-                    .add_enabled(!self.settings.model_path.as_os_str().is_empty(), egui::Button::new(i18n::t(i18n::Key::BtnStartServer, &self.lang)).fill(start_fill))
+                    .add_enabled(can_start, egui::Button::new(i18n::t(i18n::Key::BtnStartServer, &self.lang)).fill(start_fill))
                     .clicked
                 {
                     self.server_manager.start(&self.settings);

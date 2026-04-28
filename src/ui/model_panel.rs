@@ -178,11 +178,16 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, lang: &i18n::Language) 
     render_file_list(
         ui,
         &settings.model_dir,
-        selected_mmproj,
+        selected_mmproj.clone(),
         &mut |path| {
-            settings.mmproj_path = path;
+            // 再次点击已选中的路径 → 取消选中
+            settings.mmproj_path = if selected_mmproj == path {
+                std::path::PathBuf::new()
+            } else {
+                path
+            };
         },
         lang,
-       true,
+        true,
     );
 }
