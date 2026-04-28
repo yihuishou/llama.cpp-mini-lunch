@@ -198,15 +198,17 @@ impl eframe::App for LlamaLunchApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            match self.tab_selected.as_str() {
-                tab if tab == i18n::t(i18n::Key::TabServer, &self.lang) => server_panel::ui(ui, &mut self.settings, &self.settings_manager, &self.lang),
-                tab if tab == i18n::t(i18n::Key::TabRpc, &self.lang) => rpc_panel::ui(ui, &mut self.settings, &self.settings_manager, &self.lang),
-                tab if tab == i18n::t(i18n::Key::TabModel, &self.lang) => model_panel::ui(ui, &mut self.settings, &self.lang),
-              tab if tab == i18n::t(i18n::Key::TabParams, &self.lang) => params_panel::ui(ui, &mut self.settings, &self.lang),
-                 tab if tab == i18n::t(i18n::Key::TabLog, &self.lang) => log_panel::ui(ui, &mut self.server_manager, &self.lang),
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                match self.tab_selected.as_str() {
+                    tab if tab == i18n::t(i18n::Key::TabServer, &self.lang) => server_panel::ui(ui, &mut self.settings, &self.settings_manager, &self.lang),
+                    tab if tab == i18n::t(i18n::Key::TabRpc, &self.lang) => rpc_panel::ui(ui, &mut self.settings, &self.settings_manager, &self.lang),
+                    tab if tab == i18n::t(i18n::Key::TabModel, &self.lang) => model_panel::ui(ui, &mut self.settings, &self.lang),
+                  tab if tab == i18n::t(i18n::Key::TabParams, &self.lang) => params_panel::ui(ui, &mut self.settings, &self.lang),
+                     tab if tab == i18n::t(i18n::Key::TabLog, &self.lang) => log_panel::ui(ui, &mut self.server_manager, &self.lang),
 
-                _ => { ui.label(i18n::t(i18n::Key::GenericSelectModule, &self.lang)); },
-            }
+                    _ => { ui.label(i18n::t(i18n::Key::GenericSelectModule, &self.lang)); },
+                }
+            });
         });
 
         ctx.request_repaint_after(std::time::Duration::from_millis(500));

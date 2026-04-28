@@ -49,13 +49,18 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, settings_manager: &Sett
         ui.add(egui::DragValue::new(&mut settings.parallel_slots).range(1..=32));
     });
 
-    // GPU 层数
-    ui.horizontal(|ui| {
-        ui.label(i18n::t(i18n::Key::LabelGpuLayers, lang));
-        ui.text_edit_singleline(&mut settings.gpu_layers_str);
-        ui.small(i18n::t(i18n::Key::HintGpuLayers, lang));
-    });
-
     ui.add_space(8.0);
     ui.checkbox(&mut settings.verbose, i18n::t(i18n::Key::CheckboxVerbose, lang));
+
+    ui.add_space(8.0);
+    ui.checkbox(&mut settings.rpc_mode, i18n::t(i18n::Key::CheckboxRpcMode, lang));
+    if settings.rpc_mode {
+        ui.indent("rpc_endpoints", |ui| {
+            ui.horizontal(|ui| {
+                ui.label(i18n::t(i18n::Key::LabelRpcEndpoints, lang));
+                ui.text_edit_singleline(&mut settings.rpc_endpoints);
+                ui.small(i18n::t(i18n::Key::HintRpcEndpoints, lang));
+            });
+        });
+    }
 }

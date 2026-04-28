@@ -23,20 +23,31 @@ pub fn ui(ui: &mut egui::Ui, manager: &mut ServerManager, lang: &i18n::Language)
             });
         } else {
             for entry in &logs {
-                let color = match entry.level {
-                    LogLevel::Info => egui::Color32::LIGHT_GRAY,
-                    LogLevel::Warn => egui::Color32::YELLOW,
-                    LogLevel::Error => egui::Color32::RED,
-                };
-
                 let prefix = match entry.level {
                     LogLevel::Info => "",
                     LogLevel::Warn => "⚠ ",
                     LogLevel::Error => "✖ ",
                 };
 
+                let text = format!("{}{}", prefix, entry.text);
+
                 ui.horizontal_wrapped(|ui| {
-                    ui.colored_label(color, format!("{}{}", prefix, entry.text));
+                    match entry.level {
+                        LogLevel::Info => {
+                            ui.colored_label(egui::Color32::LIGHT_GRAY, &text);
+                        }
+                        LogLevel::Warn => {
+                            egui::Frame::default()
+                                .fill(egui::Color32::from_rgb(80, 80, 80))
+                                .inner_margin(egui::Margin::same(4.0))
+                                .show(ui, |ui| {
+                                    ui.colored_label(egui::Color32::YELLOW, &text);
+                                });
+                        }
+                        LogLevel::Error => {
+                            ui.colored_label(egui::Color32::RED, &text);
+                        }
+                    }
                 });
             }
         }

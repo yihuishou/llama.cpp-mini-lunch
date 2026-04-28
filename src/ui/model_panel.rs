@@ -68,11 +68,4 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, lang: &i18n::Language) 
         settings.mmproj_path = std::path::PathBuf::from(&mmproj_path_str);
     }
 
-    // mmproj 路径验证提示
-    if !settings.mmproj_path.as_os_str().is_empty() {
-        let exists = settings.mmproj_path.exists();
-        let (icon, color) = if exists { ("✓", egui::Color32::from_rgb(110, 255, 140)) }
-            else { ("✗", egui::Color32::from_rgb(255, 100, 100)) };
-        ui.colored_label(color, format!("{} {}", icon, if exists { i18n::t(i18n::Key::FileExists, lang) } else { i18n::t(i18n::Key::FileNotExists, lang) }));
-    }
 }

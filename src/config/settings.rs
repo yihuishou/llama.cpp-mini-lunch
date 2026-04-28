@@ -47,6 +47,12 @@ pub struct AppSettings {
 
     // 高级
     pub verbose: bool,
+
+    // RPC 模式 (llama-server)
+    #[serde(default)]
+    pub rpc_mode: bool,
+    #[serde(default)]
+    pub rpc_endpoints: String,
 }
 
 impl Default for AppSettings {
@@ -80,6 +86,8 @@ impl Default for AppSettings {
             rpc_device: "".to_string(),
             rpc_cache: false,
             verbose: false,
+            rpc_mode: false,
+            rpc_endpoints: "127.0.0.1:50052".to_string(),
         }
     }
 }

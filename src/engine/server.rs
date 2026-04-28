@@ -145,6 +145,11 @@ impl ServerManager {
             cmd.arg("--verbose");
         }
 
+        // RPC 模式
+        if settings.rpc_mode {
+            cmd.arg("--rpc").arg(&settings.rpc_endpoints);
+        }
+
         cmd.stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped());
 

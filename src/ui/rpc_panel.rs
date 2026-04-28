@@ -31,14 +31,6 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, settings_manager: &Sett
         settings.rpc_server_path = std::path::PathBuf::from(&rpc_path_str);
     }
 
-    // 路径验证提示
-    if !settings.rpc_server_path.as_os_str().is_empty() {
-        let exists = settings.rpc_server_path.exists();
-        let (icon, color) = if exists { ("✓", egui::Color32::from_rgb(110, 255, 140)) }
-            else { ("✗", egui::Color32::from_rgb(255, 100, 100)) };
-        ui.colored_label(color, format!("{} {}", icon, if exists { i18n::t(i18n::Key::FileExists, lang) } else { i18n::t(i18n::Key::FileNotExists, lang) }));
-    }
-
     ui.add_space(8.0);
 
     // 监听地址
