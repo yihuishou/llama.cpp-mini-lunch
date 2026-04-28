@@ -183,21 +183,6 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, lang: &i18n::Language) 
             settings.mmproj_path = path;
         },
         lang,
-        true,
-    );
-
-    // 分隔
-    ui.add_space(12.0);
-    ui.heading(i18n::t(i18n::Key::SectionMmproj, lang));
-    ui.separator();
-    render_file_list(
-        ui,
-        &settings.model_dir,
-            settings.mmproj_path.clone(),
-                &mut |path| {
-                    settings.mmproj_path = path;
-                },
-        lang,
-        true,
+       true,
     );
 }

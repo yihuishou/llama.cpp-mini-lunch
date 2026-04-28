@@ -1,6 +1,7 @@
 ﻿#[cfg(windows)]
 fn main() {
     let mut res = winres::WindowsResource::new();
+    res.set_icon("llama-blue.ico");
     res.set("ProductName", "llama.cpp lunch");
     res.set("FileDescription", "llama.cpp lunch - GUI Launcher");
     res.set("LegalCopyright", "Copyright 2025");
