@@ -12,7 +12,6 @@ pub enum Language {
 pub enum Key {
     // 菜单
     MenuFile,
-    MenuTheme,
     MenuHelp,
     MenuItemSaveConfig,
     MenuItemLoadConfig,
@@ -134,8 +133,6 @@ impl Key {
             // 菜单
             (Key::MenuFile, &Language::Zh) => "文件",
             (Key::MenuFile, &Language::En) => "File",
-            (Key::MenuTheme, &Language::Zh) => "主题",
-            (Key::MenuTheme, &Language::En) => "Theme",
             (Key::MenuHelp, &Language::Zh) => "帮助",
             (Key::MenuHelp, &Language::En) => "Help",
             (Key::MenuItemSaveConfig, &Language::Zh) => "保存配置",

@@ -2,7 +2,6 @@ use crate::config::settings::{AppSettings, SettingsManager};
 use crate::engine::rpc::{RpcManager, RpcState};
 use crate::engine::server::{ServerManager, ServerState};
 use crate::i18n::{self, Language};
-use crate::theme::{ThemeManager, ThemeVariant};
 use crate::ui::{log_panel, model_panel, params_panel, rpc_panel, server_panel};
 
 pub struct LlamaLunchApp {
@@ -12,9 +11,7 @@ pub struct LlamaLunchApp {
     rpc_manager: RpcManager,
     tab_selected: String,
     show_about: bool,
-    theme_variant: ThemeVariant,
-    theme_manager: ThemeManager,
-    lang: Language,
+     lang: Language,
 }
 
 impl LlamaLunchApp {
@@ -30,8 +27,6 @@ impl LlamaLunchApp {
 
         let server_manager = ServerManager::new();
         let rpc_manager = RpcManager::new();
-        let mut theme_manager = ThemeManager::new();
-        theme_manager.init(&cc.egui_ctx);
 
         // 全局 UI 放大 1.5 倍
         cc.egui_ctx.set_zoom_factor(1.5);
@@ -43,8 +38,6 @@ impl LlamaLunchApp {
             rpc_manager,
             tab_selected: "Server".to_string(),
             show_about: false,
-            theme_variant: ThemeVariant::Latte,
-            theme_manager,
             lang,
         }
     }
@@ -159,22 +152,6 @@ impl eframe::App for LlamaLunchApp {
                 self.render_server_controls(ui);
                 self.render_rpc_controls(ui);
 
-                ui.separator();
-
-                ui.menu_button(i18n::t(i18n::Key::MenuTheme, &self.lang), |ui| {
-                    for variant in ThemeVariant::all_variants() {
-                        let selected = self.theme_variant == variant;
-                        let label = if selected {
-                            format!("◉ {}", variant.label())
-                        } else {
-                            format!("○ {}", variant.label())
-                        };
-                        if ui.button(label).clicked() {
-                            self.theme_variant = variant;
-                            self.theme_manager.apply(variant, ctx);
-                        }
-                    }
-                });
                 ui.menu_button(i18n::t(i18n::Key::MenuHelp, &self.lang), |ui| {
                     if ui.button(i18n::t(i18n::Key::MenuItemAbout, &self.lang)).clicked() {
                         self.show_about = true;
