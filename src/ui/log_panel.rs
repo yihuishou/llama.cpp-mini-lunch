@@ -1,13 +1,13 @@
 use crate::engine::server::{LogLevel, ServerManager};
 use crate::i18n;
 
-pub fn ui(ui: &mut egui::Ui, manager: &mut ServerManager, lang: &i18n::Language) {
+pub fn ui(ui: &mut egui::Ui, server: &mut ServerManager, lang: &i18n::Language) {
     ui.heading(i18n::t(i18n::Key::PanelLogTitle, lang));
     ui.separator();
 
     ui.horizontal(|ui| {
         if ui.small_button(i18n::t(i18n::Key::BtnClearLogs, lang)).clicked() {
-            manager.clear_logs();
+            server.clear_logs();
         }
         ui.small(i18n::t(i18n::Key::HintLogSession, lang));
     });
@@ -15,7 +15,7 @@ pub fn ui(ui: &mut egui::Ui, manager: &mut ServerManager, lang: &i18n::Language)
     ui.add_space(8.0);
 
     egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
-        let logs = manager.logs();
+        let logs = server.logs();
         if logs.is_empty() {
             ui.add_space(20.0);
             ui.horizontal_centered(|ui| {

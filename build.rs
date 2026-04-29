@@ -10,7 +10,7 @@ fn main() {
     res.set_version_info(winres::VersionInfo::FILEVERSION, 0x0000000100000000u64);
     res.set_version_info(winres::VersionInfo::PRODUCTVERSION, 0x0000000100000000u64);
     res.set_version_info(winres::VersionInfo::FILEOS, 0x40004u64);
-    res.set_version_info(winres::VersionInfo::FILETYPE, 1u64);
+    res.set_version_info(winres::VersionInfo::FILETYPE, 0x2u64);
     res.compile().unwrap();
 }
 

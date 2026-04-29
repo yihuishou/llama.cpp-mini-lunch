@@ -5,6 +5,9 @@ use std::process::{Child, Command};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
 /// RPC 服务器运行状态
 #[derive(Debug, Clone, PartialEq)]
 pub enum RpcState {
@@ -32,6 +35,7 @@ pub struct RpcManager {
     state: RpcState,
     connection: RpcConnection,
     inner: Arc<Mutex<RpcInner>>,
+    launch_command: Option<String>,
     _threads: Vec<thread::JoinHandle<()>>,
 }
 
@@ -41,6 +45,7 @@ impl RpcManager {
             state: RpcState::Idle,
             connection: RpcConnection::Disconnected,
             inner: Arc::new(Mutex::new(RpcInner { child: None })),
+            launch_command: None,
             _threads: Vec::new(),
         }
     }
@@ -51,6 +56,11 @@ impl RpcManager {
 
     pub fn is_running(&self) -> bool {
         matches!(self.state, RpcState::Running)
+    }
+
+    /// 获取 RPC 启动命令
+    pub fn launch_command(&self) -> Option<String> {
+        self.launch_command.clone()
     }
 
     pub fn status_text(&self, lang: &i18n::Language) -> String {
@@ -108,8 +118,20 @@ impl RpcManager {
         cmd.stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped());
 
+        // Windows: 隐藏子进程的命令行窗口
+        #[cfg(target_os = "windows")]
+        cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+
+        // 捕获启动命令（在 spawn 消费 cmd 之前）
+        let rpc_path_cloned = rpc_path.clone();
+        let cmd_line = {
+            let args: Vec<String> = cmd.get_args().map(|a| a.to_string_lossy().to_string()).collect();
+            format!("{} {}", rpc_path_cloned.display(), args.join(" "))
+        };
+
         match cmd.spawn() {
             Ok(child) => {
+                self.launch_command = Some(cmd_line);
                 {
                     let mut inner = self.inner.lock().unwrap();
                     inner.child = Some(child);
@@ -144,6 +166,7 @@ impl RpcManager {
             Err(e) => {
                 self.state = RpcState::Error(format!("{}: {}", i18n::t(i18n::Key::ErrStartFailed, &i18n::Language::En), e));
                 self.connection = RpcConnection::Disconnected;
+                self.launch_command = None;
             }
         }
     }
@@ -156,6 +179,7 @@ impl RpcManager {
             let _ = child.wait();
             self.state = RpcState::Idle;
             self.connection = RpcConnection::Disconnected;
+            self.launch_command = None;
         }
         self._threads.clear();
     }
@@ -169,6 +193,7 @@ impl RpcManager {
                     self.state = RpcState::Idle;
                 } else {
                     self.state = RpcState::Error(format!("{}: {:?}", i18n::t(i18n::Key::StatusRpcCrashed, &i18n::Language::En), status.code()));
+                    self.launch_command = None;
                 }
                 self.connection = RpcConnection::Disconnected;
             }

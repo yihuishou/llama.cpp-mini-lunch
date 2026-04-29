@@ -2,7 +2,7 @@ use crate::config::settings::{AppSettings, SettingsManager};
 use crate::engine::rpc::{RpcManager, RpcState};
 use crate::engine::server::{ServerManager, ServerState};
 use crate::i18n::{self, Language};
-use crate::ui::{log_panel, model_panel, params_panel, rpc_panel, server_panel};
+use crate::ui::{launch_commands_panel, log_panel, model_panel, params_panel, rpc_panel, server_panel};
 
 pub struct LlamaLunchApp {
     settings: AppSettings,
@@ -138,6 +138,7 @@ impl eframe::App for LlamaLunchApp {
                     i18n::t(i18n::Key::TabModel, &self.lang),
                     i18n::t(i18n::Key::TabParams, &self.lang),
                     i18n::t(i18n::Key::TabLog, &self.lang),
+                    i18n::t(i18n::Key::TabCommands, &self.lang),
                 ];
                 for tab in &tabs {
                     let selected = self.tab_selected == *tab;
@@ -183,7 +184,8 @@ impl eframe::App for LlamaLunchApp {
                     tab if tab == i18n::t(i18n::Key::TabRpc, &self.lang) => rpc_panel::ui(ui, &mut self.settings, &self.settings_manager, &self.lang),
                     tab if tab == i18n::t(i18n::Key::TabModel, &self.lang) => model_panel::ui(ui, &mut self.settings, &self.lang),
                   tab if tab == i18n::t(i18n::Key::TabParams, &self.lang) => params_panel::ui(ui, &mut self.settings, &self.lang),
-                     tab if tab == i18n::t(i18n::Key::TabLog, &self.lang) => log_panel::ui(ui, &mut self.server_manager, &self.lang),
+                      tab if tab == i18n::t(i18n::Key::TabLog, &self.lang) => log_panel::ui(ui, &mut self.server_manager, &self.lang),
+                      tab if tab == i18n::t(i18n::Key::TabCommands, &self.lang) => launch_commands_panel::ui(ui, &self.server_manager, &self.rpc_manager, &self.lang),
 
                     _ => { ui.label(i18n::t(i18n::Key::GenericSelectModule, &self.lang)); },
                 }

@@ -5,6 +5,9 @@ use std::process::{Child, Command};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum ServerState {
     Idle,
@@ -35,6 +38,7 @@ struct InnerState {
 pub struct ServerManager {
     state: ServerState,
     inner: Arc<Mutex<InnerState>>,
+    launch_command: Option<String>,
     _threads: Vec<thread::JoinHandle<()>>,
 }
 
@@ -46,6 +50,7 @@ impl ServerManager {
                 child: None,
                 logs: Vec::new(),
             })),
+            launch_command: None,
             _threads: Vec::new(),
         }
     }
@@ -76,6 +81,10 @@ impl ServerManager {
         self.inner.lock().unwrap().logs.clear();
     }
 
+    pub fn launch_command(&self) -> Option<String> {
+        self.launch_command.clone()
+    }
+
     pub fn start(&mut self, settings: &AppSettings) {
         if self.is_running() {
             return;
@@ -91,6 +100,7 @@ impl ServerManager {
 
         self.state = ServerState::Starting;
         self.clear_logs();
+        self.launch_command = None;
         self._threads.clear();
 
         let mut cmd = Command::new(&server_path);
@@ -150,8 +160,22 @@ impl ServerManager {
             cmd.arg("--rpc").arg(&settings.rpc_endpoints);
         }
 
+        // 记录启动命令
+        let cmd_str = format!(
+            "{} {}",
+            server_path.display(),
+            cmd.get_args()
+                .map(|a| a.to_string_lossy())
+                .collect::<Vec<_>>()
+                .join(" ")
+        );
+
         cmd.stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped());
+
+        // Windows: 隐藏子进程的命令行窗口
+        #[cfg(target_os = "windows")]
+        cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
 
         match cmd.spawn() {
             Ok(child) => {
@@ -159,6 +183,7 @@ impl ServerManager {
                     let mut inner = self.inner.lock().unwrap();
                     inner.child = Some(child);
                 }
+                self.launch_command = Some(cmd_str);
 
                 let inner_clone = Arc::clone(&self.inner);
                 let stdout_thread = thread::spawn(move || {
@@ -226,6 +251,7 @@ impl ServerManager {
             }
             Err(e) => {
                 self.state = ServerState::Error(format!("{}: {}", i18n::t(i18n::Key::ErrStartFailed, &i18n::Language::En), e));
+                self.launch_command = None;
             }
         }
     }
@@ -237,6 +263,7 @@ impl ServerManager {
             let _ = child.wait();
             self.state = ServerState::Idle;
         }
+        self.launch_command = None;
         self._threads.clear();
     }
 

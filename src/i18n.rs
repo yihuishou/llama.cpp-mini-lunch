@@ -23,6 +23,7 @@ pub enum Key {
     TabModel,
     TabParams,
     TabLog,
+    TabCommands,
 
     // 按钮
     BtnStartServer,
@@ -111,6 +112,10 @@ pub enum Key {
     PanelLogTitle,
     HintLogSession,
     HintNoLogs,
+    SectionLaunchCommands,
+    LabelServerCommand,
+    LabelRpcCommand,
+    HintNoCommand,
 
     // 错误信息
     ErrServerModelMissing,
@@ -154,6 +159,8 @@ impl Key {
  
             (Key::TabLog, &Language::Zh) => "日志",
             (Key::TabLog, &Language::En) => "Logs",
+            (Key::TabCommands, &Language::Zh) => "启动命令",
+            (Key::TabCommands, &Language::En) => "Launch Cmd",
 
             // 按钮
             (Key::BtnStartServer, &Language::Zh) => "启动 Server",
@@ -334,6 +341,16 @@ impl Key {
             (Key::HintLogSession, &Language::En) => "Logs are only kept for the current session",
             (Key::HintNoLogs, &Language::Zh) => "暂无日志输出",
             (Key::HintNoLogs, &Language::En) => "No log output",
+
+            // 启动命令
+            (Key::SectionLaunchCommands, &Language::Zh) => "启动命令",
+            (Key::SectionLaunchCommands, &Language::En) => "Launch Commands",
+            (Key::LabelServerCommand, &Language::Zh) => "Server 启动命令:",
+            (Key::LabelServerCommand, &Language::En) => "Server Command:",
+            (Key::LabelRpcCommand, &Language::Zh) => "RPC 启动命令:",
+            (Key::LabelRpcCommand, &Language::En) => "RPC Command:",
+            (Key::HintNoCommand, &Language::Zh) => "尚未启动",
+            (Key::HintNoCommand, &Language::En) => "Not launched",
 
             // 错误信息
             (Key::ErrServerModelMissing, &Language::Zh) => "请先配置 Server 路径和模型路径",
