@@ -34,7 +34,7 @@ pub fn ui(ui: &mut egui::Ui, server: &mut ServerManager, lang: &i18n::Language) 
                 ui.horizontal_wrapped(|ui| {
                     match entry.level {
                         LogLevel::Info => {
-                            ui.colored_label(egui::Color32::LIGHT_GRAY, &text);
+                            ui.colored_label(egui::Color32::BLACK, &text);
                         }
                         LogLevel::Warn => {
                             egui::Frame::default()

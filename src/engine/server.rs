@@ -232,7 +232,7 @@ impl ServerManager {
                                     } else if l.contains("ERROR") || l.contains("error") {
                                         LogLevel::Error
                                     } else {
-                                        LogLevel::Warn
+                                        LogLevel::Info
                                     };
                                     let mut inner = inner_clone2.lock().unwrap();
                                     inner.logs.push(LogEntry {
