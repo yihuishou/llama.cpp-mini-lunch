@@ -215,7 +215,7 @@ impl Key {
     (Key::CheckboxRpcMode, &Language::En) => "RPC Mode",
             (Key::LabelRpcEndpoints, &Language::Zh) => "RPC 节点地址:",
             (Key::LabelRpcEndpoints, &Language::En) => "RPC Endpoints:",
-   (Key::HintRpcEndpoints, &Language::Zh) => "逗号分隔，如: 主机IP:端口,主机IP:端口",
+   (Key::HintRpcEndpoints, &Language::Zh) => "逗号分隔，如: 主机IP:端口,从机IP:端口",
     (Key::HintRpcEndpoints, &Language::En) => "comma separated, e.g.: host:port,host:port",
             (Key::DialogSelectServer, &Language::Zh) => "选择 llama-server 可执行文件",
             (Key::DialogSelectServer, &Language::En) => "Select llama-server executable",
