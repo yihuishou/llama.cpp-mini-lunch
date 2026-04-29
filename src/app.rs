@@ -54,7 +54,11 @@ impl LlamaLunchApp {
         let stop_fill = egui::Color32::from_rgb(180, 50, 50);
         match server_state {
             ServerState::Idle | ServerState::Error(_) => {
-                let can_start = !self.settings.server_path.as_os_str().is_empty()
+                let server_path_valid = self.settings.server_path
+                    .file_name()
+                    .and_then(|f| f.to_str())
+                    .is_some_and(|name| name == "llama-server.exe");
+                let can_start = server_path_valid
                     && !self.settings.model_path.as_os_str().is_empty();
                 if ui
                     .add_enabled(can_start, egui::Button::new(i18n::t(i18n::Key::BtnStartServer, &self.lang)).fill(start_fill))
@@ -80,8 +84,12 @@ impl LlamaLunchApp {
         let rpc_stop_fill = egui::Color32::from_rgb(180, 50, 50);
         match rpc_state {
             RpcState::Idle | RpcState::Error(_) => {
+                let rpc_path_valid = self.settings.rpc_server_path
+                    .file_name()
+                    .and_then(|f| f.to_str())
+                    .is_some_and(|name| name == "rpc-server.exe");
                 if ui
-                    .add_enabled(!self.settings.rpc_server_path.as_os_str().is_empty(), egui::Button::new(i18n::t(i18n::Key::BtnStartRpc, &self.lang)).fill(rpc_start_fill))
+                    .add_enabled(rpc_path_valid, egui::Button::new(i18n::t(i18n::Key::BtnStartRpc, &self.lang)).fill(rpc_start_fill))
                     .clicked
                 {
                     self.rpc_manager.start(&self.settings);
