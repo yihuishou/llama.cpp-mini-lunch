@@ -2,8 +2,7 @@ use crate::config::settings::{AppSettings, SettingsManager};
 use crate::engine::rpc::{RpcManager, RpcState};
 use crate::engine::server::{ServerManager, ServerState};
 use crate::i18n::{self, Language};
-use crate::theme::{ThemeManager, ThemeVariant};
-use crate::ui::{log_panel, model_panel, params_panel, rpc_panel, server_panel};
+use crate::ui::{launch_commands_panel, log_panel, model_panel, params_panel, rpc_panel, server_panel};
 
 pub struct LlamaLunchApp {
     settings: AppSettings,
@@ -12,9 +11,7 @@ pub struct LlamaLunchApp {
     rpc_manager: RpcManager,
     tab_selected: String,
     show_about: bool,
-    theme_variant: ThemeVariant,
-    theme_manager: ThemeManager,
-    lang: Language,
+     lang: Language,
 }
 
 impl LlamaLunchApp {
@@ -30,8 +27,6 @@ impl LlamaLunchApp {
 
         let server_manager = ServerManager::new();
         let rpc_manager = RpcManager::new();
-        let mut theme_manager = ThemeManager::new();
-        theme_manager.init(&cc.egui_ctx);
 
         // 全局 UI 放大 1.5 倍
         cc.egui_ctx.set_zoom_factor(1.5);
@@ -43,8 +38,6 @@ impl LlamaLunchApp {
             rpc_manager,
             tab_selected: "Server".to_string(),
             show_about: false,
-            theme_variant: ThemeVariant::Latte,
-            theme_manager,
             lang,
         }
     }
@@ -61,8 +54,14 @@ impl LlamaLunchApp {
         let stop_fill = egui::Color32::from_rgb(180, 50, 50);
         match server_state {
             ServerState::Idle | ServerState::Error(_) => {
+                let server_path_valid = self.settings.server_path
+                    .file_name()
+                    .and_then(|f| f.to_str())
+                    .is_some_and(|name| name == "llama-server.exe");
+                let can_start = server_path_valid
+                    && !self.settings.model_path.as_os_str().is_empty();
                 if ui
-                    .add_enabled(!self.settings.model_path.as_os_str().is_empty(), egui::Button::new(i18n::t(i18n::Key::BtnStartServer, &self.lang)).fill(start_fill))
+                    .add_enabled(can_start, egui::Button::new(i18n::t(i18n::Key::BtnStartServer, &self.lang)).fill(start_fill))
                     .clicked
                 {
                     self.server_manager.start(&self.settings);
@@ -85,8 +84,12 @@ impl LlamaLunchApp {
         let rpc_stop_fill = egui::Color32::from_rgb(180, 50, 50);
         match rpc_state {
             RpcState::Idle | RpcState::Error(_) => {
+                let rpc_path_valid = self.settings.rpc_server_path
+                    .file_name()
+                    .and_then(|f| f.to_str())
+                    .is_some_and(|name| name == "rpc-server.exe");
                 if ui
-                    .add_enabled(!self.settings.rpc_server_path.as_os_str().is_empty(), egui::Button::new(i18n::t(i18n::Key::BtnStartRpc, &self.lang)).fill(rpc_start_fill))
+                    .add_enabled(rpc_path_valid, egui::Button::new(i18n::t(i18n::Key::BtnStartRpc, &self.lang)).fill(rpc_start_fill))
                     .clicked
                 {
                     self.rpc_manager.start(&self.settings);
@@ -143,6 +146,7 @@ impl eframe::App for LlamaLunchApp {
                     i18n::t(i18n::Key::TabModel, &self.lang),
                     i18n::t(i18n::Key::TabParams, &self.lang),
                     i18n::t(i18n::Key::TabLog, &self.lang),
+                    i18n::t(i18n::Key::TabCommands, &self.lang),
                 ];
                 for tab in &tabs {
                     let selected = self.tab_selected == *tab;
@@ -157,22 +161,6 @@ impl eframe::App for LlamaLunchApp {
                 self.render_server_controls(ui);
                 self.render_rpc_controls(ui);
 
-                ui.separator();
-
-                ui.menu_button(i18n::t(i18n::Key::MenuTheme, &self.lang), |ui| {
-                    for variant in ThemeVariant::all_variants() {
-                        let selected = self.theme_variant == variant;
-                        let label = if selected {
-                            format!("◉ {}", variant.label())
-                        } else {
-                            format!("○ {}", variant.label())
-                        };
-                        if ui.button(label).clicked() {
-                            self.theme_variant = variant;
-                            self.theme_manager.apply(variant, ctx);
-                        }
-                    }
-                });
                 ui.menu_button(i18n::t(i18n::Key::MenuHelp, &self.lang), |ui| {
                     if ui.button(i18n::t(i18n::Key::MenuItemAbout, &self.lang)).clicked() {
                         self.show_about = true;
@@ -204,7 +192,8 @@ impl eframe::App for LlamaLunchApp {
                     tab if tab == i18n::t(i18n::Key::TabRpc, &self.lang) => rpc_panel::ui(ui, &mut self.settings, &self.settings_manager, &self.lang),
                     tab if tab == i18n::t(i18n::Key::TabModel, &self.lang) => model_panel::ui(ui, &mut self.settings, &self.lang),
                   tab if tab == i18n::t(i18n::Key::TabParams, &self.lang) => params_panel::ui(ui, &mut self.settings, &self.lang),
-                     tab if tab == i18n::t(i18n::Key::TabLog, &self.lang) => log_panel::ui(ui, &mut self.server_manager, &self.lang),
+                      tab if tab == i18n::t(i18n::Key::TabLog, &self.lang) => log_panel::ui(ui, &mut self.server_manager, &self.lang),
+                      tab if tab == i18n::t(i18n::Key::TabCommands, &self.lang) => launch_commands_panel::ui(ui, &self.server_manager, &self.rpc_manager, &self.lang),
 
                     _ => { ui.label(i18n::t(i18n::Key::GenericSelectModule, &self.lang)); },
                 }

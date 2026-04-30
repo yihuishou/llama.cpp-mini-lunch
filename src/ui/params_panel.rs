@@ -10,7 +10,7 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, lang: &i18n::Language) 
         ui.label(i18n::t(i18n::Key::LabelNCtx, lang));
         ui.add(
             egui::DragValue::new(&mut settings.n_ctx)
-                .range(256..=131072)
+                .range(256..=262144)
                 .speed(256),
         );
     });
@@ -57,7 +57,7 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, lang: &i18n::Language) 
     ui.heading(i18n::t(i18n::Key::SectionKvCache, lang));
     ui.separator();
 
-    // KV 缓存卸载
+    // K/V 缓存卸载
     ui.horizontal(|ui| {
         ui.checkbox(&mut settings.kv_offload, i18n::t(i18n::Key::CheckboxKvOffload, lang));
         ui.small(i18n::t(i18n::Key::HintKvOffload, lang));

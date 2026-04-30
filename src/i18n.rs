@@ -12,7 +12,6 @@ pub enum Language {
 pub enum Key {
     // 菜单
     MenuFile,
-    MenuTheme,
     MenuHelp,
     MenuItemSaveConfig,
     MenuItemLoadConfig,
@@ -24,6 +23,7 @@ pub enum Key {
     TabModel,
     TabParams,
     TabLog,
+    TabCommands,
 
     // 按钮
     BtnStartServer,
@@ -112,6 +112,10 @@ pub enum Key {
     PanelLogTitle,
     HintLogSession,
     HintNoLogs,
+    SectionLaunchCommands,
+    LabelServerCommand,
+    LabelRpcCommand,
+    HintNoCommand,
 
     // 错误信息
     ErrServerModelMissing,
@@ -134,8 +138,6 @@ impl Key {
             // 菜单
             (Key::MenuFile, &Language::Zh) => "文件",
             (Key::MenuFile, &Language::En) => "File",
-            (Key::MenuTheme, &Language::Zh) => "主题",
-            (Key::MenuTheme, &Language::En) => "Theme",
             (Key::MenuHelp, &Language::Zh) => "帮助",
             (Key::MenuHelp, &Language::En) => "Help",
             (Key::MenuItemSaveConfig, &Language::Zh) => "保存配置",
@@ -157,6 +159,8 @@ impl Key {
  
             (Key::TabLog, &Language::Zh) => "日志",
             (Key::TabLog, &Language::En) => "Logs",
+            (Key::TabCommands, &Language::Zh) => "启动命令",
+            (Key::TabCommands, &Language::En) => "Launch Cmd",
 
             // 按钮
             (Key::BtnStartServer, &Language::Zh) => "启动 Server",
@@ -211,12 +215,12 @@ impl Key {
             (Key::HintGpuLayers, &Language::En) => "(number/auto/all)",
             (Key::CheckboxVerbose, &Language::Zh) => "详细输出 (verbose)",
           (Key::CheckboxVerbose, &Language::En) => "Verbose output",
-            (Key::CheckboxRpcMode, &Language::Zh) => "RPC 模式 (--rpc)",
-            (Key::CheckboxRpcMode, &Language::En) => "RPC Mode (--rpc)",
+(Key::CheckboxRpcMode, &Language::Zh) => "RPC 模式",
+    (Key::CheckboxRpcMode, &Language::En) => "RPC Mode",
             (Key::LabelRpcEndpoints, &Language::Zh) => "RPC 节点地址:",
             (Key::LabelRpcEndpoints, &Language::En) => "RPC Endpoints:",
-            (Key::HintRpcEndpoints, &Language::Zh) => "(格式: host:port,host:port)",
-            (Key::HintRpcEndpoints, &Language::En) => "(format: host:port,host:port)",
+   (Key::HintRpcEndpoints, &Language::Zh) => "逗号分隔，如: 主机IP:端口,从机IP:端口",
+    (Key::HintRpcEndpoints, &Language::En) => "comma separated, e.g.: host:port,host:port",
             (Key::DialogSelectServer, &Language::Zh) => "选择 llama-server 可执行文件",
             (Key::DialogSelectServer, &Language::En) => "Select llama-server executable",
             (Key::FilterExecutable, &Language::Zh) => "可执行文件",
@@ -281,7 +285,7 @@ impl Key {
             (Key::LabelRepeatPenalty, &Language::En) => "Repeat Penalty:",
             (Key::SectionKvCache, &Language::Zh) => "KV 缓存配置",
             (Key::SectionKvCache, &Language::En) => "KV Cache Config",
-            (Key::CheckboxKvOffload, &Language::Zh) => "KV 缓存卸载到 GPU",
+            (Key::CheckboxKvOffload, &Language::Zh) => "K/V 缓存卸载到 GPU",
             (Key::CheckboxKvOffload, &Language::En) => "KV Cache Offload to GPU",
             (Key::HintKvOffload, &Language::Zh) => "(默认开启)",
             (Key::HintKvOffload, &Language::En) => "(default: on)",
@@ -313,7 +317,7 @@ impl Key {
  Top P: 核采样阈值，只保留累积概率超过该值的token\n\
  Top K: 只保留概率最高的K个候选token\n\
  重复惩罚: 降低重复内容的概率\n\n\
- KV 缓存卸载: 允许将 KV 缓存卸载到 GPU\n\
+ K/V 缓存卸载: 允许将 K/V 缓存卸载到 GPU\n\
  K/V 缓存类型: 缓存数据类型 (f16, q8_0, q4_0)，使用量化类型可节省显存\n\n\
  GPU 层数: 存储在显存中的模型层数\n\
  拆分模式: layer(按层), none(单GPU), row(按行), tensor(按张量)\n\
@@ -337,6 +341,16 @@ impl Key {
             (Key::HintLogSession, &Language::En) => "Logs are only kept for the current session",
             (Key::HintNoLogs, &Language::Zh) => "暂无日志输出",
             (Key::HintNoLogs, &Language::En) => "No log output",
+
+            // 启动命令
+            (Key::SectionLaunchCommands, &Language::Zh) => "启动命令",
+            (Key::SectionLaunchCommands, &Language::En) => "Launch Commands",
+            (Key::LabelServerCommand, &Language::Zh) => "Server 启动命令:",
+            (Key::LabelServerCommand, &Language::En) => "Server Command:",
+            (Key::LabelRpcCommand, &Language::Zh) => "RPC 启动命令:",
+            (Key::LabelRpcCommand, &Language::En) => "RPC Command:",
+            (Key::HintNoCommand, &Language::Zh) => "尚未启动",
+            (Key::HintNoCommand, &Language::En) => "Not launched",
 
             // 错误信息
             (Key::ErrServerModelMissing, &Language::Zh) => "请先配置 Server 路径和模型路径",

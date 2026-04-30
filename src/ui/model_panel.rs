@@ -178,25 +178,15 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, lang: &i18n::Language) 
     render_file_list(
         ui,
         &settings.model_dir,
-        selected_mmproj,
+        selected_mmproj.clone(),
         &mut |path| {
-            settings.mmproj_path = path;
+            // 再次点击已选中的路径 → 取消选中
+            settings.mmproj_path = if selected_mmproj == path {
+                std::path::PathBuf::new()
+            } else {
+                path
+            };
         },
-        lang,
-        true,
-    );
-
-    // 分隔
-    ui.add_space(12.0);
-    ui.heading(i18n::t(i18n::Key::SectionMmproj, lang));
-    ui.separator();
-    render_file_list(
-        ui,
-        &settings.model_dir,
-            settings.mmproj_path.clone(),
-                &mut |path| {
-                    settings.mmproj_path = path;
-                },
         lang,
         true,
     );
