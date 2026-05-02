@@ -121,6 +121,11 @@ impl ServerManager {
             cmd.arg("--mmproj").arg(&settings.mmproj_path);
         }
 
+        // DFlash 草稿文件
+        if !settings.dflash_path.as_os_str().is_empty() {
+            cmd.arg("-md").arg(&settings.dflash_path).arg("--spec-type").arg("dflash");
+        }
+
         // KV 缓存配置
         if settings.kv_offload {
             cmd.arg("-kvo");

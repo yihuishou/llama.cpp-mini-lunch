@@ -59,13 +59,26 @@ fn is_mmproj_file(filename: &str) -> bool {
         || (lower.contains("proj") && lower.contains("vision"))
 }
 
+/// 判断是否为 DFlash 草稿文件
+fn is_dflash_file(filename: &str) -> bool {
+    filename.to_lowercase().contains("dflash")
+}
+
+/// 文件列表展示模式
+#[derive(Clone, Copy, PartialEq)]
+enum FileMode {
+    Main,
+    Mmproj,
+    Dflash,
+}
+
 fn render_file_list(
     ui: &mut egui::Ui,
     dir: &std::path::Path,
     selected_path: std::path::PathBuf,
     on_select: &mut impl FnMut(std::path::PathBuf),
     lang: &i18n::Language,
-    is_mmproj_mode: bool,
+    mode: FileMode,
 ) {
     let entries: Vec<_> = match std::fs::read_dir(dir) {
         Ok(entries) => entries
@@ -75,10 +88,10 @@ fn render_file_list(
                 if !name.ends_with(".gguf") {
                     return false;
                 }
-                if is_mmproj_mode {
-                    is_mmproj_file(&name)
-                } else {
-                    !is_mmproj_file(&name)
+                match mode {
+                    FileMode::Main => !is_mmproj_file(&name) && !is_dflash_file(&name),
+                    FileMode::Mmproj => is_mmproj_file(&name),
+                    FileMode::Dflash => is_dflash_file(&name),
                 }
             })
             .collect(),
@@ -88,10 +101,10 @@ fn render_file_list(
     if entries.is_empty() {
         ui.colored_label(
             egui::Color32::GRAY,
-            if is_mmproj_mode {
-                i18n::t(i18n::Key::NoMmprojFiles, lang)
-            } else {
-                i18n::t(i18n::Key::NoGgufFiles, lang)
+            match mode {
+                FileMode::Main => i18n::t(i18n::Key::NoGgufFiles, lang),
+                FileMode::Mmproj => i18n::t(i18n::Key::NoMmprojFiles, lang),
+                FileMode::Dflash => i18n::t(i18n::Key::NoDflashFiles, lang),
             },
         );
         return;
@@ -167,7 +180,7 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, lang: &i18n::Language) 
             settings.model_path = path;
         },
         lang,
-        false,
+        FileMode::Main,
     );
 
     // 分隔
@@ -188,6 +201,27 @@ pub fn ui(ui: &mut egui::Ui, settings: &mut AppSettings, lang: &i18n::Language) 
             };
         },
         lang,
-        true,
+        FileMode::Mmproj,
+    );
+
+    // DFlash 草稿文件
+    ui.add_space(12.0);
+    ui.heading(i18n::t(i18n::Key::SectionDflash, lang));
+    ui.separator();
+    let selected_dflash = settings.dflash_path.clone();
+    render_file_list(
+        ui,
+        &settings.model_dir,
+        selected_dflash.clone(),
+        &mut |path| {
+            // 再次点击已选中的路径 → 取消选中
+            settings.dflash_path = if selected_dflash == path {
+                std::path::PathBuf::new()
+            } else {
+                path
+            };
+        },
+        lang,
+        FileMode::Dflash,
     );
 }

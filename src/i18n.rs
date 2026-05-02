@@ -78,8 +78,10 @@ pub enum Key {
     NoModelDir,
     SectionModels,
     SectionMmproj,
+    SectionDflash,
     NoGgufFiles,
     NoMmprojFiles,
+    NoDflashFiles,
 
     // 参数面板
     PanelParamsTitle,
@@ -263,6 +265,10 @@ impl Key {
             (Key::NoGgufFiles, &Language::En) => "No .gguf files in folder",
             (Key::NoMmprojFiles, &Language::Zh) => "没有检测到 mmproj 文件",
             (Key::NoMmprojFiles, &Language::En) => "No mmproj files detected",
+            (Key::SectionDflash, &Language::Zh) => "DFlash 草稿文件",
+            (Key::SectionDflash, &Language::En) => "DFlash Draft Files",
+            (Key::NoDflashFiles, &Language::Zh) => "没有检测到 DFlash 文件",
+            (Key::NoDflashFiles, &Language::En) => "No DFlash files detected",
 
             // 参数面板
             (Key::PanelParamsTitle, &Language::Zh) => "推理参数",

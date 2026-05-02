@@ -16,6 +16,8 @@ pub struct AppSettings {
     pub model_path: PathBuf,
     pub mmproj_path: PathBuf,
     #[serde(default)]
+    pub dflash_path: PathBuf,
+    #[serde(default)]
     pub model_dir: PathBuf,
 
     // 推理参数
@@ -66,6 +68,7 @@ impl Default for AppSettings {
             parallel_slots: 4,
             model_path: PathBuf::new(),
     mmproj_path: PathBuf::new(),
+    dflash_path: PathBuf::new(),
     model_dir: PathBuf::new(),
             n_ctx: 4096,
             n_predict: 256,
