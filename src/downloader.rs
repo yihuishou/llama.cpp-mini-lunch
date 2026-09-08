@@ -170,6 +170,14 @@ pub enum DownloadVariant {
     LinuxRocmLemonade(String),
     /// Linux x64 ROCm 10（官方 ggml-org 版本）
     LinuxRocm10,
+    /// Windows x64 SYCL
+    WinSycl,
+    /// Windows x64 OpenVINO
+    WinOpenVino,
+    /// Linux x64 SYCL
+    LinuxSycl,
+    /// Linux x64 OpenVINO
+    LinuxOpenVino,
 }
 
 impl DownloadVariant {
@@ -215,6 +223,11 @@ impl DownloadVariant {
             DownloadVariant::LinuxRocm10 => {
                 "llama-.*-bin-ubuntu-rocm-10\\.0-x64\\.tar\\.gz".to_string()
             }
+            // SYCL / OpenVINO 变体
+            DownloadVariant::WinSycl => "bin-win-sycl-x64".to_string(),
+            DownloadVariant::WinOpenVino => "bin-win-openvino".to_string(),
+            DownloadVariant::LinuxSycl => "bin-ubuntu-sycl-fp16-x64".to_string(),
+            DownloadVariant::LinuxOpenVino => "bin-ubuntu-openvino".to_string(),
         }
     }
 
@@ -233,7 +246,9 @@ impl DownloadVariant {
             | DownloadVariant::LinuxArm64
             | DownloadVariant::LinuxVulkan
             | DownloadVariant::LinuxVulkanArm64
-            | DownloadVariant::LinuxRocm10 => ".tar.gz",
+            | DownloadVariant::LinuxRocm10
+            | DownloadVariant::LinuxSycl
+            | DownloadVariant::LinuxOpenVino => ".tar.gz",
             // lemonade-sdk 的 Linux 版本也使用 zip 格式
             DownloadVariant::LinuxRocmLemonade(_) => ".zip",
             _ => ".zip",
@@ -275,6 +290,20 @@ impl DownloadVariant {
                     DownloadVariant::LinuxRocm10
                 } else {
                     DownloadVariant::WinRocm10
+                }
+            }
+            "sycl" => {
+                if is_linux {
+                    DownloadVariant::LinuxSycl
+                } else {
+                    DownloadVariant::WinSycl
+                }
+            }
+            "openvino" => {
+                if is_linux {
+                    DownloadVariant::LinuxOpenVino
+                } else {
+                    DownloadVariant::WinOpenVino
                 }
             }
             "vulkan" => {

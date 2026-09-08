@@ -205,6 +205,19 @@ pub fn ui(
                         "vulkan".to_string(),
                         i18n::t(i18n::Key::VariantGpuVulkan, lang),
                     );
+                    // SYCL / OpenVINO 选项（仅主分支显示，TurboQuant 分支不显示）
+                    if !is_turboquant_branch {
+                        ui.selectable_value(
+                            &mut settings.download_variant,
+                            "sycl".to_string(),
+                            i18n::t(i18n::Key::VariantGpuSycl, lang),
+                        );
+                        ui.selectable_value(
+                            &mut settings.download_variant,
+                            "openvino".to_string(),
+                            i18n::t(i18n::Key::VariantGpuOpenVino, lang),
+                        );
+                    }
                 });
             }
 
